@@ -100,27 +100,37 @@ export const getPostsByTag = async (tag: string): Promise<BlogPost[]> => {
 
 /** Get ALL posts (draft + published) for admin */
 export const getAllPosts = async (): Promise<BlogPost[]> => {
-  const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  try {
+    const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  } catch (error: any) {
+    console.error("DEBUG: blog-service getAllPosts error:", error);
+    throw error;
+  }
 };
 
 /** Create a new post */
 export const createPost = async (
   data: Omit<BlogPost, "id" | "createdAt" | "updatedAt">
 ): Promise<BlogPost> => {
-  const now = new Date().toISOString();
-  const payload = {
-    ...data,
-    slug: data.slug || slugify(data.title),
-    readTime: calcReadTime(data.content),
-    tag: data.tags?.[0] || "",          // primary tag kept for compat
-    createdAt: now,
-    updatedAt: now,
-    publishedAt: data.status === "published" ? now : data.publishedAt || null,
-  };
-  const docRef = await addDoc(collection(db, COLLECTION), payload);
-  return { id: docRef.id, ...payload } as BlogPost;
+  try {
+    const now = new Date().toISOString();
+    const payload = {
+      ...data,
+      slug: data.slug || slugify(data.title),
+      readTime: calcReadTime(data.content),
+      tag: data.tags?.[0] || "",          // primary tag kept for compat
+      createdAt: now,
+      updatedAt: now,
+      publishedAt: data.status === "published" ? now : data.publishedAt || null,
+    };
+    const docRef = await addDoc(collection(db, COLLECTION), payload);
+    return { id: docRef.id, ...payload } as BlogPost;
+  } catch (error: any) {
+    console.error("DEBUG: blog-service createPost error:", error);
+    throw error;
+  }
 };
 
 /** Update an existing post */

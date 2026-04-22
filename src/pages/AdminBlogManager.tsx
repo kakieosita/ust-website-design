@@ -83,7 +83,8 @@ const AdminBlogManager = () => {
     try {
       const data = await getAllPosts();
       setPosts(data);
-    } catch {
+    } catch (err: any) {
+      console.error("DEBUG: fetchPosts Error:", err);
       toast.error("Failed to fetch posts");
     } finally {
       setLoading(false);
@@ -155,16 +156,17 @@ const AdminBlogManager = () => {
         await updatePost(currentPost.id, payload);
         toast.success(targetStatus === "published" ? "Post published! 🎉" : "Draft saved.");
       } else {
-        await createPost(payload as Omit<BlogPost, "id" | "createdAt" | "updatedAt">);
+        const data = await createPost(payload as Omit<BlogPost, "id" | "createdAt" | "updatedAt">);
+        console.log("DEBUG: Create Post Success:", data);
         toast.success(targetStatus === "published" ? "Post published! 🎉" : "Draft created.");
       }
 
       setImageFile(null);
       setImagePreview("");
       setView("list");
-      fetchPosts();
+      await fetchPosts();
     } catch (error: any) {
-      console.error(error);
+      console.error("DEBUG: Blog Save Error:", error);
       toast.error("Save failed: " + (error.message || "Unknown error"));
     } finally {
       setSaving(false);
