@@ -9,16 +9,35 @@ import { Send } from "lucide-react";
 const ContactForm = () => {
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("https://formspree.io/f/admin@upskillinstitute.org", {
+        method: "POST",
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast.success("Message sent successfully! We'll get back to you shortly.");
+        form.reset();
+      } else {
+        const data = await response.json();
+        throw new Error(data.errors?.map((e: any) => e.message).join(", ") || "Failed to send message");
+      }
+    } catch (error: any) {
+      console.error("Form submission error:", error);
+      toast.error(error.message || "Something went wrong. Please try again later.");
+    } finally {
       setLoading(false);
-      toast.success("Message sent successfully! We'll get back to you shortly.");
-      (e.target as HTMLFormElement).reset();
-    }, 1500);
+    }
   };
 
   return (
@@ -34,22 +53,22 @@ const ContactForm = () => {
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" placeholder="John Doe" required className="rounded-xl border-border/60" />
+            <Input id="name" name="fullName" placeholder="John Doe" required className="rounded-xl border-border/60" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
-            <Input id="email" type="email" placeholder="john@example.com" required className="rounded-xl border-border/60" />
+            <Input id="email" name="email" type="email" placeholder="john@example.com" required className="rounded-xl border-border/60" />
           </div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <Input id="phone" type="tel" placeholder="+234 ..." className="rounded-xl border-border/60" />
+            <Input id="phone" name="phone" type="tel" placeholder="+234 ..." className="rounded-xl border-border/60" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" placeholder="How can we help?" required className="rounded-xl border-border/60" />
+            <Input id="subject" name="subject" placeholder="How can we help?" required className="rounded-xl border-border/60" />
           </div>
         </div>
 
@@ -57,6 +76,7 @@ const ContactForm = () => {
           <Label htmlFor="message">Your Message</Label>
           <Textarea 
             id="message" 
+            name="message"
             placeholder="Type your message here..." 
             className="min-h-[150px] rounded-xl border-border/60"
             required
