@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { db } from "@/lib/firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,23 +17,24 @@ const ContactForm = () => {
 
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
+    
+    const messageData = {
+      fullName: String(formData.get("fullName") || ""),
+      email: String(formData.get("email") || ""),
+      phone: String(formData.get("phone") || ""),
+      subject: String(formData.get("subject") || ""),
+      message: String(formData.get("message") || ""),
+      createdAt: serverTimestamp(),
+      status: "new"
+    };
+
+    console.log("Submitting message to Firestore:", messageData);
 
     try {
-      const response = await fetch("https://formspree.io/f/admin@upskillinstitute.org", {
-        method: "POST",
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        toast.success("Message sent successfully! We'll get back to you shortly.");
-        form.reset();
-      } else {
-        const data = await response.json();
-        throw new Error(data.errors?.map((e: any) => e.message).join(", ") || "Failed to send message");
-      }
+      await addDoc(collection(db, "contact_messages"), messageData);
+      
+      toast.success("Message sent successfully! We'll get back to you shortly.");
+      form.reset();
     } catch (error: any) {
       console.error("Form submission error:", error);
       toast.error(error.message || "Something went wrong. Please try again later.");

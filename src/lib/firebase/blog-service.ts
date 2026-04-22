@@ -104,7 +104,12 @@ export const getPostBySlug = async (slug: string): Promise<BlogPost | null> => {
   const snap = await getDocs(q);
   if (snap.empty) return null;
   const d = snap.docs[0];
-  return { id: d.id, ...d.data() } as BlogPost;
+  const data = d.data();
+  return { 
+    id: d.id, 
+    ...data,
+    image: data.image || data.featuredImage || "", // Unify image field
+  } as BlogPost;
 };
 
 /** Get published posts filtered by a tag */
@@ -116,7 +121,14 @@ export const getPostsByTag = async (tag: string): Promise<BlogPost[]> => {
     orderBy("publishedAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return { 
+      id: d.id, 
+      ...data,
+      image: data.image || data.featuredImage || "", // Unify image field
+    } as BlogPost;
+  });
 };
 
 // ─── Admin API ────────────────────────────────────────────────────────────────
@@ -126,7 +138,14 @@ export const getAllPosts = async (): Promise<BlogPost[]> => {
   try {
     const q = query(collection(db, COLLECTION), orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return { 
+        id: d.id, 
+        ...data,
+        image: data.image || data.featuredImage || "", // Unify image field
+      } as BlogPost;
+    });
   } catch (error: any) {
     console.error("DEBUG: blog-service getAllPosts error:", error);
     throw error;

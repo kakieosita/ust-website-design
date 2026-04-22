@@ -171,7 +171,7 @@ const BlogDetail = () => {
               </Button>
             </div>
 
-            <BlogCommentSection />
+            <BlogCommentSection postId={post.id} />
           </div>
         </article>
 

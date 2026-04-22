@@ -43,6 +43,14 @@ export interface Program {
   deliveryMode: 'On-campus' | 'Online' | 'Hybrid';
   featuredImage: string;
   createdAt: string;
+  // Richer content fields (optional)
+  tagline?: string;
+  overview?: string;
+  highlights?: string[];
+  curriculum?: { title: string; topics: string[] }[];
+  instructor?: { name: string; role: string; bio: string; image?: string };
+  level?: string;
+  schedule?: string;
 }
 
 export interface Event {

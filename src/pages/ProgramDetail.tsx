@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,7 +10,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Clock, Calendar, Monitor, MapPin, Users, ArrowLeft, CheckCircle2, GraduationCap } from "lucide-react";
+import { Clock, Calendar, Monitor, MapPin, Users, ArrowLeft, CheckCircle2, GraduationCap, Loader2 } from "lucide-react";
+import { firestoreService } from "@/lib/firebase/services";
+import { Program } from "@/types/firestore";
 
 const programsData: Record<string, {
   name: string;
@@ -124,8 +127,55 @@ const levelColor: Record<string, string> = {
 
 const ProgramDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const full = slug ? programsData[slug] : null;
-  const data = full || { name: programNames[slug || ""] || "Program", ...fallback };
+  const [program, setProgram] = useState<Program | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProgram = async () => {
+      if (!slug) return;
+      try {
+        const data = await firestoreService.getOne<Program>("programs", slug);
+        if (data) {
+          setProgram(data);
+        }
+      } catch (error) {
+        console.error("Failed to load program details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProgram();
+  }, [slug]);
+
+  // Priority: 1. Firestore, 2. Mock Data, 3. Fallback
+  const fullMock = slug ? programsData[slug] : null;
+  const dbData = program ? {
+    name: program.title,
+    tagline: program.tagline || fallback.tagline,
+    level: program.level || "Beginner",
+    mode: program.deliveryMode,
+    duration: program.duration,
+    schedule: program.schedule || fallback.schedule,
+    price: program.price,
+    overview: program.overview || program.description || fallback.overview,
+    highlights: program.highlights || fallback.highlights,
+    curriculum: program.curriculum || fallback.curriculum,
+    instructor: program.instructor || fallback.instructor,
+  } : null;
+
+  const data = dbData || fullMock || { name: programNames[slug || ""] || "Program", ...fallback };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <Loader2 className="animate-spin text-accent" size={48} />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <>

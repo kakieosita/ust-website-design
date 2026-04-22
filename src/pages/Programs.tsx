@@ -1,98 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Clock, Monitor, Users, MapPin } from "lucide-react";
+import { Search, Clock, Monitor, Users, MapPin, Loader2 } from "lucide-react";
+import { firestoreService } from "@/lib/firebase/services";
+import { Program } from "@/types/firestore";
 
-const programs = [
-  {
-    id: "software-engineering",
-    name: "Software Engineering Bootcamp",
-    description: "Master full-stack development with hands-on projects using modern frameworks and tools.",
-    duration: "16 Weeks",
-    level: "Beginner",
-    category: "Engineering",
-    mode: "Hybrid",
-    price: "₦350,000",
-  },
-  {
-    id: "data-science",
-    name: "Data Science & Analytics",
-    description: "Learn to extract insights from data using Python, SQL, machine learning and visualization tools.",
-    duration: "12 Weeks",
-    level: "Intermediate",
-    category: "Data",
-    mode: "Online",
-    price: "₦300,000",
-  },
-  {
-    id: "cybersecurity",
-    name: "Cybersecurity Fundamentals",
-    description: "Build expertise in network security, ethical hacking, and security operations.",
-    duration: "10 Weeks",
-    level: "Beginner",
-    category: "Security",
-    mode: "Physical",
-    price: "₦280,000",
-  },
-  {
-    id: "cloud-computing",
-    name: "Cloud Computing & DevOps",
-    description: "Deploy and manage scalable infrastructure on AWS, Azure, and GCP with CI/CD pipelines.",
-    duration: "12 Weeks",
-    level: "Advanced",
-    category: "Engineering",
-    mode: "Online",
-    price: "₦320,000",
-  },
-  {
-    id: "ui-ux-design",
-    name: "UI/UX Design Masterclass",
-    description: "Design beautiful, user-centered digital products from research to high-fidelity prototypes.",
-    duration: "8 Weeks",
-    level: "Beginner",
-    category: "Design",
-    mode: "Hybrid",
-    price: "₦220,000",
-  },
-  {
-    id: "product-management",
-    name: "Product Management",
-    description: "Learn to build and ship digital products with Agile, user research, and go-to-market strategies.",
-    duration: "8 Weeks",
-    level: "Intermediate",
-    category: "Business",
-    mode: "Online",
-    price: "₦250,000",
-  },
-  {
-    id: "corporate-training",
-    name: "Corporate Tech Training",
-    description: "Customized upskilling programs for teams in software, data, cloud, and digital transformation.",
-    duration: "Flexible",
-    level: "All Levels",
-    category: "Business",
-    mode: "Hybrid",
-    price: "Custom",
-  },
-  {
-    id: "ai-machine-learning",
-    name: "AI & Machine Learning",
-    description: "Dive into deep learning, NLP, computer vision and deploy AI-powered applications.",
-    duration: "14 Weeks",
-    level: "Advanced",
-    category: "Data",
-    mode: "Online",
-    price: "₦400,000",
-  },
-];
-
-const categories = ["All", "Engineering", "Data", "Security", "Design", "Business"];
-const modes = ["All", "Online", "Physical", "Hybrid"];
-const levels = ["All", "Beginner", "Intermediate", "Advanced"];
+const categories = ["All", "Engineering", "Data", "Security", "Business", "Software", "Cybersecurity"];
+const modes = ["All", "Online", "Physical", "Hybrid", "On-campus"];
+const levels = ["All", "Beginner", "Intermediate", "Advanced", "All Levels"];
 
 const levelColor: Record<string, string> = {
   Beginner: "bg-accent/15 text-accent border-accent/30",
@@ -104,6 +23,7 @@ const levelColor: Record<string, string> = {
 const modeIcon: Record<string, React.ReactNode> = {
   Online: <Monitor size={14} />,
   Physical: <MapPin size={14} />,
+  "On-campus": <MapPin size={14} />,
   Hybrid: <Users size={14} />,
 };
 
@@ -112,18 +32,40 @@ const Programs = () => {
   const [category, setCategory] = useState("All");
   const [mode, setMode] = useState("All");
   const [level, setLevel] = useState("All");
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const data = await firestoreService.getAll<Program>("programs");
+        setPrograms(data);
+      } catch (error) {
+        console.error("Failed to load programs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPrograms();
+  }, []);
 
   const filtered = useMemo(() => {
     return programs.filter((p) => {
+      const pName = p.title || "";
+      const pDesc = p.description || "";
+      const pCat = p.category || "";
+      const pMode = p.deliveryMode || "";
+      const pLevel = (p as any).level || "All Levels";
+
       const matchSearch =
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.description.toLowerCase().includes(search.toLowerCase());
-      const matchCat = category === "All" || p.category === category;
-      const matchMode = mode === "All" || p.mode === mode;
-      const matchLevel = level === "All" || p.level === level;
+        pName.toLowerCase().includes(search.toLowerCase()) ||
+        pDesc.toLowerCase().includes(search.toLowerCase());
+      const matchCat = category === "All" || pCat === category;
+      const matchMode = mode === "All" || pMode === mode;
+      const matchLevel = level === "All" || pLevel === level;
       return matchSearch && matchCat && matchMode && matchLevel;
     });
-  }, [search, category, mode, level]);
+  }, [search, category, mode, level, programs]);
 
   return (
     <>
@@ -168,48 +110,61 @@ const Programs = () => {
             </p>
 
             {/* Grid */}
-            {filtered.length > 0 ? (
+            {loading ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="animate-spin text-accent" size={40} />
+              </div>
+            ) : filtered.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filtered.map((p) => (
-                  <div
-                    key={p.id}
-                    className="group bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden"
-                  >
-                    {/* Color bar */}
-                    <div className="h-1.5 bg-gradient-to-r from-primary to-accent" />
+                {filtered.map((p) => {
+                  const pLevel = (p as any).level || "All Levels";
+                  return (
+                    <div
+                      key={p.id}
+                      className="group bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden"
+                    >
+                      {/* Featured Image or Color bar */}
+                      {p.featuredImage ? (
+                        <div className="h-40 overflow-hidden">
+                           <img src={p.featuredImage} alt={p.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        </div>
+                      ) : (
+                        <div className="h-1.5 bg-gradient-to-r from-primary to-accent" />
+                      )}
 
-                    <div className="p-5 flex flex-col flex-1">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className={`text-xs ${levelColor[p.level]}`}>
-                          {p.level}
-                        </Badge>
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {modeIcon[p.mode]} {p.mode}
-                        </span>
+                      <div className="p-5 flex flex-col flex-1">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Badge variant="outline" className={`text-xs ${levelColor[pLevel]}`}>
+                            {pLevel}
+                          </Badge>
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            {modeIcon[p.deliveryMode] || modeIcon.Hybrid} {p.deliveryMode}
+                          </span>
+                        </div>
+
+                        <h3 className="font-display font-700 text-lg leading-snug mb-2 group-hover:text-primary transition-colors">
+                          {p.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
+                          {p.description}
+                        </p>
+
+                        <div className="flex items-center justify-between text-sm mb-4">
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Clock size={14} /> {p.duration}
+                          </span>
+                          <span className="font-semibold text-foreground">{p.price}</span>
+                        </div>
+
+                        <Link to={`/programs/${p.id}`}>
+                          <Button variant="cta" size="sm" className="w-full">
+                            View Details
+                          </Button>
+                        </Link>
                       </div>
-
-                      <h3 className="font-display font-700 text-lg leading-snug mb-2 group-hover:text-primary transition-colors">
-                        {p.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">
-                        {p.description}
-                      </p>
-
-                      <div className="flex items-center justify-between text-sm mb-4">
-                        <span className="flex items-center gap-1.5 text-muted-foreground">
-                          <Clock size={14} /> {p.duration}
-                        </span>
-                        <span className="font-semibold text-foreground">{p.price}</span>
-                      </div>
-
-                      <Link to={`/programs/${p.id}`}>
-                        <Button variant="cta" size="sm" className="w-full">
-                          View Details
-                        </Button>
-                      </Link>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-20">

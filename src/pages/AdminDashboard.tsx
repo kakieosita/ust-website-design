@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { 
-  LayoutDashboard, 
+  LayoutDashboard,
   FileText, 
-  Users, 
-  Settings, 
   LogOut, 
   ChevronRight, 
   Menu,
   X,
-  PlusCircle,
-  Briefcase
+  PlusCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutUser } from "@/lib/firebase/auth";
@@ -34,9 +31,6 @@ const AdminDashboard = () => {
   const navItems = [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Blog Posts", href: "/admin/blog", icon: FileText },
-    { label: "Page Content", href: "/admin/pages", icon: Settings },
-    { label: "Partners", href: "/admin/partners", icon: Briefcase },
-    { label: "Users", href: "/admin/users", icon: Users },
   ];
 
   return (
