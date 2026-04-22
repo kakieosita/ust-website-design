@@ -21,10 +21,15 @@ export const seedDatabase = async () => {
     });
 
     // 2. Blog Posts (collection: blog_posts — matches blog-service.ts)
+    // IMPORTANT: Use slug as the Firestore doc ID and DO NOT store the
+    // legacy numeric `id` field — otherwise getAllPosts() would return
+    // stale ids like "1","2","3" and updates would fail with
+    // "No document to update".
     for (const post of blogPosts) {
+      const { id: _legacyId, ...postData } = post;
       const blogRef = doc(db, "blog_posts", post.slug);
       batch.set(blogRef, {
-        ...post,
+        ...postData,
         authorId: DEFAULT_AUTHOR_ID,
         featuredImage: post.image || PLACEHOLDER_IMAGE,
         status: "published",
