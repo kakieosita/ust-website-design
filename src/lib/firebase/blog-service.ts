@@ -65,13 +65,37 @@ export const deleteFeaturedImage = async (url: string) => {
 
 /** Get all PUBLISHED posts, newest first */
 export const getPublishedPosts = async (): Promise<BlogPost[]> => {
-  const q = query(
-    collection(db, COLLECTION),
-    where("status", "==", "published"),
-    orderBy("publishedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as BlogPost));
+  try {
+    const q = query(
+      collection(db, COLLECTION),
+      where("status", "==", "published"),
+      orderBy("publishedAt", "desc")
+    );
+    const snap = await getDocs(q);
+    
+    // Process results to handle legacy field names
+    return snap.docs.map((d) => {
+      const data = d.data();
+      return { 
+        id: d.id, 
+        ...data,
+        image: data.image || data.featuredImage || "", // Unify image field
+      } as BlogPost;
+    });
+  } catch (error: any) {
+    console.error("DEBUG: blog-service getPublishedPosts error:", error);
+    // If orderBy fails (missing index), fallback to a basic query and sort manually
+    const qBasic = query(collection(db, COLLECTION), where("status", "==", "published"));
+    const snap = await getDocs(qBasic);
+    const posts = snap.docs.map((d) => {
+        const data = d.data();
+        return { id: d.id, ...data, image: data.image || data.featuredImage || "" } as BlogPost;
+    });
+    return posts.sort((a, b) => 
+        new Date(b.publishedAt || b.createdAt || 0).getTime() - 
+        new Date(a.publishedAt || a.createdAt || 0).getTime()
+    );
+  }
 };
 
 /** Get single post by slug */
@@ -142,20 +166,19 @@ export const updatePost = async (
   const snap = await getDoc(docRef);
   const existing = snap.data() as BlogPost;
 
-  const wasPublished = existing?.status === "published";
-  const nowPublished = data.status === "published";
-
+  const nowPublished = data.status === "published" || existing.status === "published";
+    
   await updateDoc(docRef, {
     ...data,
     slug: data.slug || slugify(data.title || existing.title),
     readTime: calcReadTime(data.content || existing.content || ""),
     tag: (data.tags ?? existing.tags)?.[0] || "",
     updatedAt: now,
-    // Only set publishedAt the first time it's published
+    // Ensure publishedAt is NEVER null if it is published
     publishedAt:
-      !wasPublished && nowPublished
+      nowPublished && !existing.publishedAt
         ? now
-        : (data.publishedAt ?? existing.publishedAt ?? null),
+        : (data.publishedAt ?? existing.publishedAt ?? (nowPublished ? now : null)),
   });
 };
 

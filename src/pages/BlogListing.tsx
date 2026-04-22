@@ -18,9 +18,16 @@ const BlogListing = () => {
       try {
         // Only fetch PUBLISHED posts for the public page
         const data = await getPublishedPosts();
-        setPosts(data.length > 0 ? data : mockPosts);
+        
+        // Only fallback to mock data if Firestore is absolutely empty or unreachable
+        if (data && data.length > 0) {
+          setPosts(data);
+        } else {
+          console.warn("No published posts found in Firestore, falling back to local data.");
+          setPosts(mockPosts);
+        }
       } catch (error) {
-        console.error("Firestore fetch failed, using mock data:", error);
+        console.error("DEBUG: BlogListing fetch error:", error);
         setPosts(mockPosts);
       } finally {
         setLoading(false);

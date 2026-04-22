@@ -12,9 +12,14 @@ const BlogSection = () => {
     const fetchPosts = async () => {
       try {
         const data = await getPublishedPosts();
-        setPosts((data.length > 0 ? data : mockPosts).slice(0, 3));
+        
+        if (data && data.length > 0) {
+          setPosts(data.slice(0, 3));
+        } else {
+          setPosts(mockPosts.slice(0, 3));
+        }
       } catch (error) {
-        console.error("Blog fetch failed, using mock data:", error);
+        console.error("DEBUG: BlogSection fetch error:", error);
         setPosts(mockPosts.slice(0, 3));
       } finally {
         setLoading(false);

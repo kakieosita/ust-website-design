@@ -31,7 +31,7 @@ export const seedDatabase = async () => {
       batch.set(blogRef, {
         ...postData,
         authorId: DEFAULT_AUTHOR_ID,
-        featuredImage: post.image || PLACEHOLDER_IMAGE,
+        image: post.image || PLACEHOLDER_IMAGE,
         status: "published",
         publishedAt: now(),
         createdAt: now(),
