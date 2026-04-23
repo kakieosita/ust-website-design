@@ -3,32 +3,32 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
 import BlogSearch from "@/components/BlogSearch";
-import { blogPosts as mockPosts, BlogPost } from "@/lib/blog-data";
-import { getPublishedPosts, getPostsByTag } from "@/lib/firebase/blog-service";
+import { BlogPost } from "@/lib/blog-data";
+import { getPublishedPosts } from "@/lib/firebase/blog-service";
 import { Loader2 } from "lucide-react";
 
 const BlogListing = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Only fetch PUBLISHED posts for the public page
+        // Always show what's actually in Firestore — no mock fallback,
+        // otherwise CMS edits appear to "not work".
         const data = await getPublishedPosts();
-        
-        // Only fallback to mock data if Firestore is absolutely empty or unreachable
-        if (data && data.length > 0) {
-          setPosts(data);
-        } else {
-          console.warn("No published posts found in Firestore, falling back to local data.");
-          setPosts(mockPosts);
-        }
-      } catch (error) {
-        console.error("DEBUG: BlogListing fetch error:", error);
-        setPosts(mockPosts);
+        setPosts(data || []);
+      } catch (err: any) {
+        console.error("DEBUG: BlogListing fetch error:", err);
+        setError(
+          err?.code === "permission-denied"
+            ? "Unable to load posts: Firestore security rules are blocking public reads on blog_posts."
+            : "Unable to load posts. Please try again later."
+        );
+        setPosts([]);
       } finally {
         setLoading(false);
       }
@@ -87,6 +87,16 @@ const BlogListing = () => {
               <div className="py-20 flex flex-col items-center justify-center text-muted-foreground">
                 <Loader2 className="animate-spin mb-4 text-accent" size={40} />
                 <p className="font-semibold tracking-wide">Fetching the latest insights...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-20 bg-card rounded-3xl border border-dashed border-destructive/40">
+                <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4 text-destructive text-2xl">
+                  ⚠️
+                </div>
+                <h3 className="font-display text-xl font-700 text-foreground mb-2">
+                  Couldn't load articles
+                </h3>
+                <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
               </div>
             ) : filteredPosts.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
