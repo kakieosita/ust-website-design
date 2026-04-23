@@ -20,6 +20,15 @@ const BlogCard = ({ post }: BlogCardProps) => {
           <img 
             src={post.image} 
             alt={post.title} 
+            loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.dataset.fallback !== "1") {
+                img.dataset.fallback = "1";
+                img.src =
+                  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop";
+              }
+            }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
       ) : (
