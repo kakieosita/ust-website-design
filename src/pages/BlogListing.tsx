@@ -100,6 +100,17 @@ const BlogListing = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      {/* Floating debug toggle (always available so devs can flip it on without ?debug=1) */}
+      <button
+        onClick={() => setShowDebug((v) => !v)}
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background text-xs font-semibold shadow-lg hover:opacity-90 transition-opacity"
+        aria-label="Toggle debug panel"
+      >
+        <Bug size={14} />
+        {showDebug ? "Hide Debug" : "Debug"}
+      </button>
+
       <main className="pt-20">
         {/* Hero / Search */}
         <section className="py-20 bg-accent/5">
