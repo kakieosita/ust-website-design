@@ -112,6 +112,143 @@ const BlogListing = () => {
       </button>
 
       <main className="pt-20">
+        {/* Debug Panel — visible when ?debug=1 or toggled via floating button */}
+        {showDebug && (
+          <section className="container pt-6">
+            <div className="rounded-2xl border-2 border-dashed border-accent/40 bg-card p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                  <Bug className="text-accent" size={18} />
+                  <h2 className="font-display text-lg font-700 text-foreground">Blog Debug Panel</h2>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Fetched: {debugInfo?.fetchedAt || "—"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="rounded-xl bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">CMS total (getAllPosts)</p>
+                  <p className="text-2xl font-800 text-foreground">{debugInfo?.allCount ?? "—"}</p>
+                </div>
+                <div className="rounded-xl bg-accent/10 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Published (query result)</p>
+                  <p className="text-2xl font-800 text-accent">{debugInfo?.publishedCount ?? "—"}</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Drafts</p>
+                  <p className="text-2xl font-800 text-foreground">{debugInfo?.draftCount ?? "—"}</p>
+                </div>
+                <div className="rounded-xl bg-primary/10 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Rendered on /blog</p>
+                  <p className="text-2xl font-800 text-primary">{filteredPosts.length}</p>
+                </div>
+              </div>
+
+              {debugInfo?.error && (
+                <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-mono whitespace-pre-wrap">
+                  {debugInfo.error}
+                </div>
+              )}
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h3 className="text-sm font-700 text-foreground mb-2">
+                    All posts in Firestore (CMS view)
+                  </h3>
+                  <div className="rounded-lg border border-border/60 overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead className="bg-muted/40 text-muted-foreground">
+                        <tr>
+                          <th className="text-left p-2">Title</th>
+                          <th className="text-left p-2">Status</th>
+                          <th className="text-left p-2">Slug</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {debugInfo?.allPosts.length ? (
+                          debugInfo.allPosts.map((p) => (
+                            <tr key={p.id} className="border-t border-border/40">
+                              <td className="p-2 text-foreground">{p.title}</td>
+                              <td className="p-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                    p.status === "published"
+                                      ? "bg-accent/15 text-accent"
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
+                                >
+                                  {p.status}
+                                </span>
+                              </td>
+                              <td className="p-2 text-muted-foreground font-mono">{p.slug}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={3} className="p-3 text-center text-muted-foreground">
+                              No data (or rules block public reads)
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-700 text-foreground mb-2">
+                    Query: <span className="font-mono">where("status","==","published")</span>
+                  </h3>
+                  <div className="rounded-lg border border-border/60 overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead className="bg-muted/40 text-muted-foreground">
+                        <tr>
+                          <th className="text-left p-2">Title</th>
+                          <th className="text-left p-2">Slug</th>
+                          <th className="text-left p-2">publishedAt</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {debugInfo?.publishedPosts.length ? (
+                          debugInfo.publishedPosts.map((p) => (
+                            <tr key={p.id} className="border-t border-border/40">
+                              <td className="p-2 text-foreground">{p.title}</td>
+                              <td className="p-2 text-muted-foreground font-mono">{p.slug}</td>
+                              <td className="p-2 text-muted-foreground font-mono">
+                                {p.publishedAt || "null"}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={3} className="p-3 text-center text-muted-foreground">
+                              No published posts returned
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <details className="mt-4">
+                <summary className="cursor-pointer text-xs font-semibold text-muted-foreground hover:text-foreground">
+                  Raw JSON
+                </summary>
+                <pre className="mt-2 p-3 rounded-lg bg-muted/40 text-[11px] text-foreground overflow-auto max-h-80">
+                  {JSON.stringify(debugInfo, null, 2)}
+                </pre>
+              </details>
+
+              <p className="mt-4 text-[11px] text-muted-foreground">
+                Tip: append <span className="font-mono">?debug=1</span> to the URL to auto-open this panel.
+              </p>
+            </div>
+          </section>
+        )}
+
         {/* Hero / Search */}
         <section className="py-20 bg-accent/5">
           <div className="container">
