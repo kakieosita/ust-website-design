@@ -28,10 +28,18 @@ export const seedDatabase = async () => {
     for (const post of blogPosts) {
       const { id: _legacyId, ...postData } = post;
       const blogRef = doc(db, "blog_posts", post.slug);
+      // Local /assets/... paths from mock data don't exist in /public,
+      // so they would 404 in the browser. Swap to a real hosted image.
+      const isLocalAssetPath =
+        typeof post.image === "string" && post.image.startsWith("/assets/");
+      const safeImage = !post.image || isLocalAssetPath ? PLACEHOLDER_IMAGE : post.image;
+      const isLocalAuthorImg =
+        typeof post.authorImage === "string" && post.authorImage.startsWith("/assets/");
       batch.set(blogRef, {
         ...postData,
         authorId: DEFAULT_AUTHOR_ID,
-        image: post.image || PLACEHOLDER_IMAGE,
+        image: safeImage,
+        authorImage: isLocalAuthorImg ? "" : postData.authorImage,
         status: "published",
         publishedAt: now(),
         createdAt: now(),
