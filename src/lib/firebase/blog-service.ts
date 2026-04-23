@@ -102,23 +102,27 @@ export const getPostBySlug = async (slug: string): Promise<BlogPost | null> => {
   } as BlogPost;
 };
 
-/** Get published posts filtered by a tag */
+/** Get published posts filtered by a tag (sorted client-side, no composite index needed) */
 export const getPostsByTag = async (tag: string): Promise<BlogPost[]> => {
   const q = query(
     collection(db, COLLECTION),
     where("status", "==", "published"),
-    where("tags", "array-contains", tag),
-    orderBy("publishedAt", "desc")
+    where("tags", "array-contains", tag)
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => {
+  const posts = snap.docs.map((d) => {
     const data = d.data();
-    return { 
-      id: d.id, 
+    return {
+      id: d.id,
       ...data,
-      image: data.image || data.featuredImage || "", // Unify image field
+      image: data.image || data.featuredImage || "",
     } as BlogPost;
   });
+  return posts.sort(
+    (a, b) =>
+      new Date(b.publishedAt || b.createdAt || 0).getTime() -
+      new Date(a.publishedAt || a.createdAt || 0).getTime()
+  );
 };
 
 // ─── Admin API ────────────────────────────────────────────────────────────────
