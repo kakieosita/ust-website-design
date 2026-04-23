@@ -63,38 +63,28 @@ export const deleteFeaturedImage = async (url: string) => {
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
-/** Get all PUBLISHED posts, newest first */
+/** Get all PUBLISHED posts, newest first.
+ * Sort is done client-side to avoid requiring a composite Firestore index. */
 export const getPublishedPosts = async (): Promise<BlogPost[]> => {
   try {
-    const q = query(
-      collection(db, COLLECTION),
-      where("status", "==", "published"),
-      orderBy("publishedAt", "desc")
-    );
+    const q = query(collection(db, COLLECTION), where("status", "==", "published"));
     const snap = await getDocs(q);
-    
-    // Process results to handle legacy field names
-    return snap.docs.map((d) => {
+    const posts = snap.docs.map((d) => {
       const data = d.data();
-      return { 
-        id: d.id, 
+      return {
+        id: d.id,
         ...data,
-        image: data.image || data.featuredImage || "", // Unify image field
+        image: data.image || data.featuredImage || "",
       } as BlogPost;
     });
-  } catch (error: any) {
-    console.error("DEBUG: blog-service getPublishedPosts error:", error);
-    // If orderBy fails (missing index), fallback to a basic query and sort manually
-    const qBasic = query(collection(db, COLLECTION), where("status", "==", "published"));
-    const snap = await getDocs(qBasic);
-    const posts = snap.docs.map((d) => {
-        const data = d.data();
-        return { id: d.id, ...data, image: data.image || data.featuredImage || "" } as BlogPost;
-    });
-    return posts.sort((a, b) => 
-        new Date(b.publishedAt || b.createdAt || 0).getTime() - 
+    return posts.sort(
+      (a, b) =>
+        new Date(b.publishedAt || b.createdAt || 0).getTime() -
         new Date(a.publishedAt || a.createdAt || 0).getTime()
     );
+  } catch (error: any) {
+    console.error("DEBUG: blog-service getPublishedPosts error:", error);
+    throw error;
   }
 };
 
