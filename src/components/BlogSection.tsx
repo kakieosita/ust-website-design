@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Loader2 } from "lucide-react";
-import { blogPosts as mockPosts, BlogPost } from "@/lib/blog-data";
+import { BlogPost } from "@/lib/blog-data";
 import { getPublishedPosts } from "@/lib/firebase/blog-service";
 
 const BlogSection = () => {
@@ -11,16 +11,13 @@ const BlogSection = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        // Show only what's in Firestore — no mock fallback so the
+        // homepage always reflects real CMS state.
         const data = await getPublishedPosts();
-        
-        if (data && data.length > 0) {
-          setPosts(data.slice(0, 3));
-        } else {
-          setPosts(mockPosts.slice(0, 3));
-        }
+        setPosts((data || []).slice(0, 3));
       } catch (error) {
         console.error("DEBUG: BlogSection fetch error:", error);
-        setPosts(mockPosts.slice(0, 3));
+        setPosts([]);
       } finally {
         setLoading(false);
       }
