@@ -4,8 +4,18 @@ import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
 import BlogSearch from "@/components/BlogSearch";
 import { BlogPost } from "@/lib/blog-data";
-import { getPublishedPosts } from "@/lib/firebase/blog-service";
-import { Loader2 } from "lucide-react";
+import { getAllPosts, getPublishedPosts } from "@/lib/firebase/blog-service";
+import { Loader2, Bug } from "lucide-react";
+
+interface DebugInfo {
+  allCount: number;
+  publishedCount: number;
+  draftCount: number;
+  allPosts: Array<{ id: string; title: string; slug: string; status: string; publishedAt?: string | null }>;
+  publishedPosts: Array<{ id: string; title: string; slug: string; status: string; publishedAt?: string | null }>;
+  fetchedAt: string;
+  error?: string;
+}
 
 const BlogListing = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -13,14 +23,40 @@ const BlogListing = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
+  const [showDebug, setShowDebug] = useState(
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")
+  );
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Always show what's actually in Firestore — no mock fallback,
-        // otherwise CMS edits appear to "not work".
-        const data = await getPublishedPosts();
-        setPosts(data || []);
+        // Fetch published (what /blog renders) and ALL (what's in Firestore/CMS)
+        // in parallel so we can compare counts in the debug panel.
+        const [published, all] = await Promise.all([
+          getPublishedPosts(),
+          getAllPosts().catch((e) => {
+            console.warn("DEBUG: getAllPosts failed (likely rules block unauth reads):", e);
+            return [] as BlogPost[];
+          }),
+        ]);
+        setPosts(published || []);
+
+        const summarize = (p: BlogPost) => ({
+          id: p.id || "",
+          title: p.title,
+          slug: p.slug,
+          status: (p as any).status || "unknown",
+          publishedAt: p.publishedAt ?? null,
+        });
+        setDebugInfo({
+          allCount: all.length,
+          publishedCount: published.length,
+          draftCount: all.filter((p: any) => p.status === "draft").length,
+          allPosts: all.map(summarize),
+          publishedPosts: published.map(summarize),
+          fetchedAt: new Date().toISOString(),
+        });
       } catch (err: any) {
         console.error("DEBUG: BlogListing fetch error:", err);
         setError(
@@ -29,6 +65,15 @@ const BlogListing = () => {
             : "Unable to load posts. Please try again later."
         );
         setPosts([]);
+        setDebugInfo({
+          allCount: 0,
+          publishedCount: 0,
+          draftCount: 0,
+          allPosts: [],
+          publishedPosts: [],
+          fetchedAt: new Date().toISOString(),
+          error: err?.message || String(err),
+        });
       } finally {
         setLoading(false);
       }
