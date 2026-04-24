@@ -11,8 +11,6 @@ const BlogSection = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // Show only what's in Firestore — no mock fallback so the
-        // homepage always reflects real CMS state.
         const data = await getPublishedPosts();
         setPosts((data || []).slice(0, 3));
       } catch (error) {
@@ -23,6 +21,9 @@ const BlogSection = () => {
       }
     };
     fetchPosts();
+    const onFocus = () => fetchPosts();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
   return (

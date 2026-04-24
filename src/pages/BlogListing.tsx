@@ -14,25 +14,30 @@ const BlogListing = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
+  const fetchPosts = async () => {
+    try {
+      const published = await getPublishedPosts();
+      setPosts(published || []);
+      setError(null);
+    } catch (err: any) {
+      console.error("DEBUG: BlogListing fetch error:", err);
+      setError(
+        err?.code === "permission-denied"
+          ? "Unable to load posts: Firestore security rules are blocking public reads on blog_posts."
+          : "Unable to load posts. Please try again later."
+      );
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const published = await getPublishedPosts();
-        setPosts(published || []);
-        setError(null);
-      } catch (err: any) {
-        console.error("DEBUG: BlogListing fetch error:", err);
-        setError(
-          err?.code === "permission-denied"
-            ? "Unable to load posts: Firestore security rules are blocking public reads on blog_posts."
-            : "Unable to load posts. Please try again later."
-        );
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchPosts();
+    // Refetch when the tab regains focus so admin edits show up without a hard reload
+    const onFocus = () => fetchPosts();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
   // Collect unique tags from published posts
