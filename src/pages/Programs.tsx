@@ -72,12 +72,12 @@ const Programs = () => {
       <Navbar />
       <main className="pt-16">
         {/* Hero */}
-        <section className="bg-primary text-primary-foreground py-20 md:py-28">
+        <section className="bg-gradient-to-br from-primary to-brand-gradient-end text-foreground py-20 md:py-28">
           <div className="container text-center space-y-6">
-            <h1 className="font-display font-800 text-4xl md:text-5xl lg:text-6xl">
+            <h1 className="font-display font-800 text-4xl md:text-5xl lg:text-6xl text-foreground">
               Explore Our Programs
             </h1>
-            <p className="text-primary-foreground/70 max-w-2xl mx-auto text-lg">
+            <p className="text-foreground/80 max-w-2xl mx-auto text-lg">
               Industry-aligned courses designed to launch and accelerate your tech career.
             </p>
 
@@ -88,7 +88,7 @@ const Programs = () => {
                 placeholder="Search programs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-12 h-12 rounded-xl bg-primary-foreground text-foreground border-none shadow-lg text-base"
+                className="pl-12 h-12 rounded-xl bg-background border border-border text-foreground placeholder:text-muted-foreground shadow-lg text-base"
               />
             </div>
           </div>

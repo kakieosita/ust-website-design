@@ -7,18 +7,18 @@ const NewsletterSection = () => {
   const [email, setEmail] = useState("");
 
   return (
-    <section className="py-20 md:py-28 bg-primary">
+    <section className="py-20 md:py-28 bg-gradient-to-br from-primary to-brand-gradient-end">
       <div className="container">
         <div className="max-w-xl mx-auto text-center">
-          <h2 className="font-display text-3xl md:text-4xl font-800 text-primary-foreground mb-4">Stay in the Loop</h2>
-          <p className="text-primary-foreground/70 mb-8">Get the latest on new programs, scholarships, and tech opportunities delivered to your inbox.</p>
+          <h2 className="font-display text-3xl md:text-4xl font-800 text-foreground mb-4">Stay in the Loop</h2>
+          <p className="text-foreground/80 mb-8">Get the latest on new programs, scholarships, and tech opportunities delivered to your inbox.</p>
           <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row gap-3">
             <Input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 h-12 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/40 rounded-xl"
+              className="flex-1 h-12 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus-visible:ring-ring"
             />
             <Button variant="cta" size="lg" className="gap-2">
               Subscribe <Send size={16} />

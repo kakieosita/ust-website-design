@@ -21,7 +21,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border/50">
       <div className="container flex items-center justify-between h-16">
         <a href="#" className="flex items-center">
-          <img src={ustLogo} alt="Upskill School of Technology" className="h-16" />
+          <img src={ustLogo} alt="Upskill School of Technology" className="h-16 brightness-0 invert" />
         </a>
 
         {/* Desktop */}

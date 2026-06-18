@@ -182,24 +182,24 @@ const ProgramDetail = () => {
       <Navbar />
       <main className="pt-16">
         {/* Hero */}
-        <section className="bg-primary text-primary-foreground py-16 md:py-24">
+        <section className="bg-gradient-to-br from-primary to-brand-gradient-end text-foreground py-16 md:py-24">
           <div className="container max-w-4xl">
-            <Link to="/programs" className="inline-flex items-center gap-1.5 text-sm text-primary-foreground/60 hover:text-primary-foreground transition-colors mb-6">
+            <Link to="/programs" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
               <ArrowLeft size={16} /> Back to Programs
             </Link>
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <Badge variant="outline" className={`${levelColor[data.level] || ""} border`}>
                 {data.level}
               </Badge>
-              <span className="text-primary-foreground/60 text-sm flex items-center gap-1">
+              <span className="text-muted-foreground text-sm flex items-center gap-1">
                 {data.mode === "Online" ? <Monitor size={14} /> : data.mode === "Physical" ? <MapPin size={14} /> : <Users size={14} />}
                 {data.mode}
               </span>
             </div>
-            <h1 className="font-display font-800 text-3xl md:text-5xl leading-tight mb-3">
+            <h1 className="font-display font-800 text-3xl md:text-5xl leading-tight mb-3 text-foreground">
               {data.name}
             </h1>
-            <p className="text-primary-foreground/70 text-lg">{data.tagline || fallback.tagline}</p>
+            <p className="text-foreground/80 text-lg">{data.tagline || fallback.tagline}</p>
           </div>
         </section>
 
@@ -278,17 +278,17 @@ const ProgramDetail = () => {
             </div>
 
             {/* Pricing + CTA */}
-            <div className="bg-gradient-to-br from-primary to-primary/90 rounded-2xl p-8 md:p-12 text-primary-foreground text-center space-y-4">
-              <h2 className="font-display font-800 text-2xl md:text-3xl">Ready to Get Started?</h2>
-              <p className="text-primary-foreground/70 max-w-md mx-auto">
+            <div className="bg-gradient-to-br from-primary to-brand-gradient-end rounded-2xl p-8 md:p-12 text-foreground text-center space-y-4">
+              <h2 className="font-display font-800 text-2xl md:text-3xl text-foreground">Ready to Get Started?</h2>
+              <p className="text-foreground/80 max-w-md mx-auto">
                 Invest in your future with world-class training and career support.
               </p>
-              <div className="text-4xl font-display font-800 my-4">{data.price}</div>
+              <div className="text-4xl font-display font-800 my-4 text-foreground">{data.price}</div>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="cta" size="lg" className="text-base px-8">
                   Enroll Now
                 </Button>
-                <Button variant="heroOutline" size="lg" className="text-base px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+                <Button variant="heroOutline" size="lg" className="text-base px-8">
                   Apply Now
                 </Button>
               </div>

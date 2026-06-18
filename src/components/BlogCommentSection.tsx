@@ -72,7 +72,7 @@ const BlogCommentSection = ({ postId }: BlogCommentSectionProps) => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             disabled={submitting}
-            className="min-h-[120px] rounded-xl border-border/60 bg-white"
+            className="min-h-[120px] rounded-xl border-border/60 bg-background"
           />
           <Button type="submit" variant="cta" disabled={submitting} className="rounded-full px-8">
             {submitting ? "Posting..." : "Post Comment"}

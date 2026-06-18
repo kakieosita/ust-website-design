@@ -55,6 +55,9 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        /* Extended brand tokens */
+        "brand-gradient-end": "hsl(var(--brand-gradient-end))",
+        "brand-text-gradient": "hsl(var(--brand-text-gradient))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

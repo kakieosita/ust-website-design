@@ -8,23 +8,23 @@ const reasons = [
 ];
 
 const WhyUSTSection = () => (
-  <section id="why-ust" className="py-20 md:py-28 bg-primary">
+  <section id="why-ust" className="py-20 md:py-28 bg-gradient-to-br from-primary to-brand-gradient-end">
     <div className="container">
       <div className="text-center max-w-2xl mx-auto mb-14">
         <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-2">Why Choose UST</p>
-        <h2 className="font-display text-3xl md:text-4xl font-800 text-primary-foreground">Built for Impact</h2>
-        <p className="mt-4 text-primary-foreground/70">We combine rigorous curricula with real-world projects and mentorship.</p>
+        <h2 className="font-display text-3xl md:text-4xl font-800 text-foreground">Built for Impact</h2>
+        <p className="mt-4 text-foreground/80">We combine rigorous curricula with real-world projects and mentorship.</p>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {reasons.map((r) => (
-          <div key={r.title} className="text-center p-6 rounded-2xl bg-primary-foreground/5 border border-primary-foreground/10">
+          <div key={r.title} className="text-center p-6 rounded-2xl bg-background/40 border border-border/50">
             <div className="w-14 h-14 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
               <r.icon className="text-accent" size={26} />
             </div>
-            <div className="text-3xl font-display font-800 text-primary-foreground mb-1">{r.stat}</div>
-            <h3 className="font-display font-700 text-primary-foreground mb-1">{r.title}</h3>
-            <p className="text-sm text-primary-foreground/60">{r.desc}</p>
+            <div className="text-3xl font-display font-800 text-foreground mb-1">{r.stat}</div>
+            <h3 className="font-display font-700 text-foreground mb-1">{r.title}</h3>
+            <p className="text-sm text-muted-foreground">{r.desc}</p>
           </div>
         ))}
       </div>

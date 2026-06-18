@@ -23,7 +23,7 @@ const options = [
 ];
 
 const GetInvolvedSection = () => (
-  <section className="py-24 bg-accent relative overflow-hidden">
+  <section className="py-24 bg-gradient-to-br from-primary to-brand-gradient-end relative overflow-hidden">
     {/* Decorative abstract shapes */}
     <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl" />
