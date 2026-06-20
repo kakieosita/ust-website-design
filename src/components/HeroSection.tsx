@@ -12,7 +12,7 @@ const HeroSection = () => (
   <section className="relative min-h-[90vh] flex items-center pt-16 overflow-hidden">
     {/* Background */}
     <div className="absolute inset-0">
-      <img src={heroBg} alt="African students learning technology in a modern classroom" width={1920} height={1080} className="w-full h-full object-cover" />
+      <img src={heroBg} alt="African students studying together outdoors with a laptop" width={1920} height={1080} className="w-full h-full object-cover object-top" />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/50 via-background/60 to-brand-gradient-end/95" />
     </div>
 
